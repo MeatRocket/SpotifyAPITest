@@ -4,23 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.JSInterop;
-using SpotifyAPITest;
-using SpotifyAPITest.Shared;
 using SpotifyAPI.Web;
-using RestSharp;
 using static System.Net.Mime.MediaTypeNames;
 using System.Buffers.Text;
 using System.Diagnostics;
 using SpotifyAPI.Web.Auth;
 
-namespace SpotifyAPITest.Pages
+namespace SpotifyWeb.Client.Pages
 {
 	public partial class Index
 	{
@@ -32,7 +23,22 @@ namespace SpotifyAPITest.Pages
 
 		public List<FullArtist>? Artists { get; set; }
 		public List<SavedTrack>? Tracks { get; set; }
+		SpotifyClient Spotify { get; set; }
+
+		[Parameter]
+		[SupplyParameterFromQuery(Name = "token")]
 		public string? Token { get; set; }
+
+		//protected override void OnAfterRender(bool firstRender)
+		//{
+		//	base.OnAfterRender(firstRender);
+		//}
+
+		protected override async Task OnAfterRenderAsync(bool firstRender)
+		{
+			if (String.IsNullOrEmpty(Token))
+				await RequestUserToken();
+		}
 
 		public async Task OnButtonClick()
 		{
@@ -66,12 +72,12 @@ namespace SpotifyAPITest.Pages
 
 			if (Token == null)
 			{
-				await RequestUserToken();
 				return;
 			}
 
 			try
 			{
+				Spotify = new(Token);
 				Paging<SavedTrack> libraryTracks = await Spotify.Library.GetTracks();
 				Tracks = libraryTracks.Items;
 			}
@@ -86,43 +92,51 @@ namespace SpotifyAPITest.Pages
 			//Artists = p.Items;
 		}
 
-		private async Task RequestTokenOnce()
-		{
-			SpotifyClientConfig config = SpotifyClientConfig.CreateDefault();
+		//private async Task RequestTokenOnce()
+		//{
+		//	SpotifyClientConfig config = SpotifyClientConfig.CreateDefault();
 
-			ClientCredentialsRequest request = new ClientCredentialsRequest(ClientId, ClientSecret);
-			ClientCredentialsTokenResponse response = await new OAuthClient(config).RequestToken(request);
+		//	ClientCredentialsRequest request = new ClientCredentialsRequest(ClientId, ClientSecret);
+		//	ClientCredentialsTokenResponse response = await new OAuthClient(config).RequestToken(request);
 
-			Spotify = new SpotifyClient(response.AccessToken);
-		}
+		//	Spotify = new SpotifyClient(response.AccessToken);
+		//}
 
 		private async Task RequestUserToken()
 		{
 			var loginRequest = new LoginRequest(
-				  new Uri("https://localhost:7187/callback"),
+				  new Uri("https://localhost:7096/callback"),
 				  ClientId,
 				  LoginRequest.ResponseType.Token
 				)
 			{
-				Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative }
+				Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.Streaming, Scopes.UserLibraryRead }
 			};
-			var uri = loginRequest.ToUri();
+			Uri uri = loginRequest.ToUri();
 
 			// This call requires Spotify.Web.Auth
-			BrowserUtil.Open(uri);
+			//BrowserUtil.Open(uri);
+
+			Navigation.NavigateTo(uri.AbsoluteUri);
 		}
 
-		public void CallHttp()
+		protected async Task PlayTrack(string id)
 		{
-			var client = new RestClient("https://accounts.spotify.com/authorize");
-			var request = new RestRequest();
-			request.AddHeader("client_id", "ba6b181aae70405893be29fa23cd50ec");
-			request.AddHeader("client_secret", "50a12b910bdf406abd9c9e3bad2e4d15");
-			request.AddHeader("grant_type", "client_credentials");
-			request.AddHeader("Cookie", "__Host-device_id=AQDmifOv-gqBhaOSxxH_ygGBkJK_n3zpC6N-a2mMM8UyzAquh8aL5wWisQPekZFoFdfRZX1c2_-qsqEbDclX-BVokHnoR2Nbgx0; __Host-sp_csrf_sid=5e83d4c435be37e6f2aa11cff9b055cb0370adc7d29cfb84905fb9c0bceab65a; __Secure-TPASESSION=AQC0GAe6HPai9ppiRbHFAHJ0/7jGTTl7hwmEtc1w77CHKs/k4g9YLQWC3U0u/60gaoaR9laos5LVXGGkcwzRw7fM90GLBaRS4+s=; inapptestgroup=; sp_sso_csrf_token=013acda7196ce33cb2958513f592de6fbee7f1189c31363636363830373235343535; sp_tr=false");
-			var response = client.Execute(request);
-			Console.WriteLine(response.Content);
+			PlayerAddToQueueRequest queueRequest = new(id);
 
+			try
+			{
+				await Spotify.Player.AddToQueue(queueRequest);
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+		}
+
+		protected async Task PlayNextSong()
+		{
+			await Spotify.Player.SkipNext();
 		}
 	}
 }

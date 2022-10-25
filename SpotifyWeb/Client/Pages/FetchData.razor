@@ -1,13 +1,12 @@
 ﻿@page "/fetchdata"
+@using SpotifyWeb.Shared
+@inject HttpClient Http
 
 <PageTitle>Weather forecast</PageTitle>
 
-@using SpotifyAPITest.Data
-@inject WeatherForecastService ForecastService
-
 <h1>Weather forecast</h1>
 
-<p>This component demonstrates fetching data from a service.</p>
+<p>This component demonstrates fetching data from the server.</p>
 
 @if (forecasts == null)
 {
@@ -43,6 +42,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
     }
 }

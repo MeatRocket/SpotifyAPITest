@@ -1,5 +1,5 @@
-﻿@page "/{Token:string?}"
-@inject SpotifyClient Spotify
+﻿@page "/"
+@inject NavigationManager Navigation
 
 <PageTitle>Index</PageTitle>
 
@@ -9,12 +9,10 @@ Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 
-<button @onclick=OnButtonClick>IDK</button>
-
-@s
-
-
-<button @onclick=CallHttp>Toggle Play</button>
+<div>
+    <button @onclick=OnButtonClick>Get Tracks</button>
+    <button @onclick="PlayNextSong">Next Song</button>
+</div>
 
 @if (Artists != null)
 {
@@ -28,6 +26,6 @@ Welcome to your new app.
 {
     foreach (SavedTrack track in Tracks)
     {
-        <div>@track.Track.Name</div>
+        <button @onclick="(async () => { await PlayTrack(track.Track.Uri);})">@track.Track.Name</button>
     }
 }

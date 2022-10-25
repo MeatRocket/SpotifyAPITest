@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyAPITest", "SpotifyAPITest\SpotifyAPITest.csproj", "{F8E92456-4FAE-4EE6-A464-552F68B8276B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotifyAPITest", "SpotifyAPITest\SpotifyAPITest.csproj", "{F8E92456-4FAE-4EE6-A464-552F68B8276B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyWeb.Server", "SpotifyWeb\Server\SpotifyWeb.Server.csproj", "{36DF3376-0C43-41C0-A539-AEDD4CA345E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyWeb.Client", "SpotifyWeb\Client\SpotifyWeb.Client.csproj", "{15A4A478-9034-48C8-BE39-3929FF269126}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyWeb.Shared", "SpotifyWeb\Shared\SpotifyWeb.Shared.csproj", "{29285CEF-F826-44B3-BCD7-731F5A1E4026}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{F8E92456-4FAE-4EE6-A464-552F68B8276B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8E92456-4FAE-4EE6-A464-552F68B8276B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8E92456-4FAE-4EE6-A464-552F68B8276B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36DF3376-0C43-41C0-A539-AEDD4CA345E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36DF3376-0C43-41C0-A539-AEDD4CA345E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36DF3376-0C43-41C0-A539-AEDD4CA345E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36DF3376-0C43-41C0-A539-AEDD4CA345E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15A4A478-9034-48C8-BE39-3929FF269126}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15A4A478-9034-48C8-BE39-3929FF269126}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15A4A478-9034-48C8-BE39-3929FF269126}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15A4A478-9034-48C8-BE39-3929FF269126}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29285CEF-F826-44B3-BCD7-731F5A1E4026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29285CEF-F826-44B3-BCD7-731F5A1E4026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29285CEF-F826-44B3-BCD7-731F5A1E4026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29285CEF-F826-44B3-BCD7-731F5A1E4026}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
