@@ -14,3 +14,19 @@ Welcome to your new app.
 
 
 <button @onclick=CallHttp>Toggle Play</button>
+
+@if (Artists != null)
+{
+    foreach (FullArtist artist in Artists)
+    {
+        <div>@artist.Name</div>
+    }
+}
+
+@if (Tracks != null)
+{
+    foreach (SavedTrack track in Tracks)
+    {
+        <div>@track.Track.Name</div>
+    }
+}
