@@ -28,6 +28,7 @@ namespace SpotifyWeb.Client.Pages
 		[Parameter]
 		[SupplyParameterFromQuery(Name = "token")]
 		public string? Token { get; set; }
+		public string? DeviceId { get; set; }
 
 		//protected override void OnAfterRender(bool firstRender)
 		//{
@@ -36,44 +37,20 @@ namespace SpotifyWeb.Client.Pages
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
-			if (String.IsNullOrEmpty(Token))
+			if (string.IsNullOrEmpty(Token))
 				await RequestUserToken();
 		}
 
+		public object? SpotifyPlayer { get; set; }
+
 		public async Task OnButtonClick()
 		{
-			//SpotifyClientConfig config = SpotifyClientConfig.CreateDefault().WithAuthenticator(new ClientCredentialsAuthenticator("2678f1b02ff44006a21eaeabbf58bd1e", "149ce90bb0504abea6744a7a25358371"));
-
-			//SpotifyClient spotify = new(config);
-
-			//var tracks = spotify.UserProfile.Current();
-
-			//s = tracks.Id;
-
-			//Console.WriteLine(spotify.Albums);
-
-			//var content = new FormUrlEncodedContent(new[]
-			//{
-			//	new KeyValuePair<string, string>("grant_type", "client_credentials")
-			//});
-
-			//HttpClient client = new();
-
-			//client.DefaultRequestHeaders.Add("Authorization", $"Basic {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{ClientId}:{ClientSecret}"))}");
-			//client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
-
-			//HttpResponseMessage message = await client.PostAsync("https://accounts.spotify.com/api/token", content);
-
-
-			//SpotifyClientConfig config = SpotifyClientConfig.CreateDefault().WithAuthenticator(new ClientCredentialsAuthenticator(ClientId, ClientSecret));
-			//config.
-
-			//SpotifyClient spotify = new(config);
 
 			if (Token == null)
-			{
 				return;
-			}
+
+			var m = await Module;
+			SpotifyPlayer = await m.InvokeAsync<object>("init", Token);
 
 			try
 			{
@@ -91,6 +68,8 @@ namespace SpotifyWeb.Client.Pages
 
 			//Artists = p.Items;
 		}
+
+
 
 		//private async Task RequestTokenOnce()
 		//{
@@ -110,7 +89,21 @@ namespace SpotifyWeb.Client.Pages
 				  LoginRequest.ResponseType.Token
 				)
 			{
-				Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.Streaming, Scopes.UserLibraryRead }
+				Scope = new[] {
+				Scopes.PlaylistReadPrivate,
+				Scopes.PlaylistReadCollaborative,
+				Scopes.Streaming,
+				Scopes.UserLibraryRead,
+				Scopes.AppRemoteControl,
+				Scopes.UserTopRead,
+				Scopes.UserReadPlaybackState,
+				Scopes.UgcImageUpload,
+				Scopes.UserFollowRead,
+				Scopes.UserReadCurrentlyPlaying,
+				Scopes.UserReadEmail,
+				Scopes.UserReadPlaybackPosition,
+				Scopes.UserReadPrivate,
+				Scopes.UserReadRecentlyPlayed}
 			};
 			Uri uri = loginRequest.ToUri();
 
@@ -122,7 +115,19 @@ namespace SpotifyWeb.Client.Pages
 
 		protected async Task PlayTrack(string id)
 		{
-			PlayerAddToQueueRequest queueRequest = new(id);
+			if (DeviceId == null)
+			{
+				var m = await Module;
+				DeviceId = await m.InvokeAsync<string>("getDeviceId");
+			}
+
+			PlayerAddToQueueRequest queueRequest = new(id)
+			{
+				DeviceId = DeviceId
+			};
+
+			DeviceResponse deviceResponse = await Spotify.Player.GetAvailableDevices();
+			Device device = deviceResponse.Devices.First(key => key.Id == DeviceId);
 
 			try
 			{
@@ -137,6 +142,16 @@ namespace SpotifyWeb.Client.Pages
 		protected async Task PlayNextSong()
 		{
 			await Spotify.Player.SkipNext();
+		}
+
+		private Task<IJSObjectReference> _module;
+		private Task<IJSObjectReference> Module => _module ??= GetIJSObjectReference(jsRuntime, "js/spotify.js");
+
+		internal static Task<IJSObjectReference> GetIJSObjectReference(IJSRuntime jsRuntime, string path)
+		{
+			string importPath = $"./{path}?v={Guid.NewGuid()}";
+
+			return jsRuntime.InvokeAsync<IJSObjectReference>("import", importPath).AsTask();
 		}
 	}
 }
